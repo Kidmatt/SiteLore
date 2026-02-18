@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@theme {
+  --color-parchment: #f4e4bc;
+  --color-parchment-dark: #d4c49c;
+  --color-uchiha-red: #b91c1c;
+  --color-uchiha-dark: #7f1d1d;
+  --font-cinzel: "Cinzel", serif;
+  --font-zen: "Zen Antique Soft", serif;
+  --image-paper-texture: url('/paper-texture.jpg');
+}
+
+@layer base {
+  body {
+    @apply bg-gray-900 text-gray-100 font-zen overflow-hidden;
+  }
+}
