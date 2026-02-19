@@ -5,8 +5,9 @@ import { Book } from './components/Book/Book';
 import { Page } from './components/Book/Page';
 
 const ClanGrimoire = ({ clanName }: { clanName: string }) => {
-  // Get all png files from the pages directory
+  // Get all png and mp3 files from the pages directory
   const allPages = import.meta.glob('/src/assets/pages/**/*.png', { eager: true });
+  const allAudio = import.meta.glob('/src/assets/pages/**/*.mp3', { eager: true });
 
   // Filter pages for the current clan and sort them numerically
   const clanPages = Object.keys(allPages)
@@ -16,10 +17,15 @@ const ClanGrimoire = ({ clanName }: { clanName: string }) => {
       const numA = parseInt(a.split('/').pop()?.replace('.png', '') || '0');
       const numB = parseInt(b.split('/').pop()?.replace('.png', '') || '0');
       return numA - numB;
-    });
+    })
+    .map(path => (allPages[path] as { default: string }).default); // Get the resolved URL from the module
+
+  // Find the audio file for this clan
+  const audioPath = Object.keys(allAudio).find(path => path.includes(`/${clanName}.mp3`));
+  const musicSrc = audioPath ? (allAudio[audioPath] as { default: string }).default : '';
 
   return (
-    <Book musicSrc={`/src/assets/pages/${clanName}/${clanName}.mp3`}>
+    <Book musicSrc={musicSrc}>
       {clanPages.map((imgSrc, index) => (
         <Page key={index} number={index + 1} noPadding={true}>
           <div className="w-full h-full relative">
@@ -40,11 +46,11 @@ const VillageTransition = ({ isActive, village, onComplete }: { isActive: boolea
 
   const getVillageLogo = (villageName: string) => {
     switch (villageName.toLowerCase()) {
-      case 'konoha': return '/src/assets/konoha.svg';
-      case 'suna': return '/src/assets/suna.svg';
-      case 'ame': return '/src/assets/ame.svg';
-      case 'kiri': return '/src/assets/kiri.svg';
-      default: return '/src/assets/konoha.svg';
+      case 'konoha': return '/konoha.svg';
+      case 'suna': return '/suna.svg';
+      case 'ame': return '/ame.svg';
+      case 'kiri': return '/kiri.svg';
+      default: return '/konoha.svg';
     }
   };
 
@@ -228,7 +234,7 @@ const Home = () => {
       </div>
 
       <div className="absolute bottom-10 opacity-20 animate-pulse">
-        <img src="/src/assets/logo.png" alt="Logo" className="w-16 h-16 object-contain filter grayscale" />
+        <img src="/logo.png" alt="Logo" className="w-16 h-16 object-contain filter grayscale" />
       </div>
     </div>
   );
