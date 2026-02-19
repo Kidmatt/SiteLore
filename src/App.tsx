@@ -4,25 +4,23 @@ import { motion } from 'framer-motion';
 import { Book } from './components/Book/Book';
 import { Page } from './components/Book/Page';
 
-const UchihaGrimoire = () => {
-  const pages = [
-    '/src/assets/pages/uchiha/page1.jpg',
-    '/src/assets/pages/uchiha/page2.jpg',
-    '/src/assets/pages/uchiha/page3.jpg',
-    '/src/assets/pages/uchiha/page4.jpg',
-    '/src/assets/pages/uchiha/page5.jpg',
-    '/src/assets/pages/uchiha/page6.jpg',
-    '/src/assets/pages/uchiha/page7.jpg',
-    '/src/assets/pages/uchiha/page8.jpg',
-    '/src/assets/pages/uchiha/page9.jpg',
-    '/src/assets/pages/uchiha/page10.jpg',
-    '/src/assets/pages/uchiha/page11.jpg',
-    '/src/assets/pages/uchiha/page12.jpg',
-  ];
+const ClanGrimoire = ({ clanName }: { clanName: string }) => {
+  // Get all png files from the pages directory
+  const allPages = import.meta.glob('/src/assets/pages/**/*.png', { eager: true });
+
+  // Filter pages for the current clan and sort them numerically
+  const clanPages = Object.keys(allPages)
+    .filter(path => path.includes(`/src/assets/pages/${clanName}/`))
+    .sort((a, b) => {
+      // Extract numbers from filenames "1.png", "2.png" etc.
+      const numA = parseInt(a.split('/').pop()?.replace('.png', '') || '0');
+      const numB = parseInt(b.split('/').pop()?.replace('.png', '') || '0');
+      return numA - numB;
+    });
 
   return (
-    <Book musicSrc="/src/assets/pages/uchiha/uchiha.mp3">
-      {pages.map((imgSrc, index) => (
+    <Book musicSrc={`/src/assets/pages/${clanName}/${clanName}.mp3`}>
+      {clanPages.map((imgSrc, index) => (
         <Page key={index} number={index + 1} noPadding={true}>
           <div className="w-full h-full relative">
             <img
@@ -37,41 +35,18 @@ const UchihaGrimoire = () => {
   );
 };
 
-const SenjuGrimoire = () => {
-  const pages = [
-    '/src/assets/pages/senju/page1.jpg',
-    '/src/assets/pages/senju/page2.jpg',
-    '/src/assets/pages/senju/page3.jpg',
-    '/src/assets/pages/senju/page4.jpg',
-    '/src/assets/pages/senju/page5.jpg',
-    '/src/assets/pages/senju/page6.jpg',
-    '/src/assets/pages/senju/page7.jpg',
-    '/src/assets/pages/senju/page8.jpg',
-    '/src/assets/pages/senju/page9.jpg',
-    '/src/assets/pages/senju/page10.jpg',
-    '/src/assets/pages/senju/page11.jpg',
-    '/src/assets/pages/senju/page12.jpg',
-  ];
+const VillageTransition = ({ isActive, village, onComplete }: { isActive: boolean; village: string | null; onComplete: () => void }) => {
+  if (!isActive || !village) return null;
 
-  return (
-    <Book>
-      {pages.map((imgSrc, index) => (
-        <Page key={index} number={index + 1} noPadding={true}>
-          <div className="w-full h-full relative">
-            <img
-              src={imgSrc}
-              alt={`Page ${index + 1}`}
-              className="w-full h-full object-fill"
-            />
-          </div>
-        </Page>
-      ))}
-    </Book>
-  );
-};
-
-const KonohaTransition = ({ isActive, onComplete }: { isActive: boolean; onComplete: () => void }) => {
-  if (!isActive) return null;
+  const getVillageLogo = (villageName: string) => {
+    switch (villageName.toLowerCase()) {
+      case 'konoha': return '/src/assets/konoha.svg';
+      case 'suna': return '/src/assets/suna.svg';
+      case 'ame': return '/src/assets/ame.svg';
+      case 'kiri': return '/src/assets/kiri.svg';
+      default: return '/src/assets/konoha.svg';
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center pointer-events-none">
@@ -84,8 +59,8 @@ const KonohaTransition = ({ isActive, onComplete }: { isActive: boolean; onCompl
       />
 
       <motion.img
-        src="/src/assets/konoha_symbol.svg"
-        alt="Konoha"
+        src={getVillageLogo(village)}
+        alt={village}
         initial={{ scale: 0, opacity: 0, rotate: -180 }}
         animate={{ scale: [0, 1, 50], opacity: [0, 1, 1], rotate: [0, 0, 0] }}
         transition={{
@@ -100,13 +75,23 @@ const KonohaTransition = ({ isActive, onComplete }: { isActive: boolean; onCompl
   );
 };
 
-const VillageButton = ({ name, clans, onClanClick }: { name: string, clans?: { name: string, path: string }[], onClanClick?: (path: string) => void }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
+const VillageButton = ({
+  name,
+  clans,
+  isOpen,
+  onToggle,
+  onClanClick
+}: {
+  name: string,
+  clans?: { name: string, path: string }[],
+  isOpen: boolean,
+  onToggle: () => void,
+  onClanClick?: (path: string, village: string) => void
+}) => {
   return (
     <div className="relative group">
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={onToggle}
         className={`px-8 py-4 border transition-all duration-500 rounded-sm relative overflow-hidden min-w-[200px]
           ${isOpen ? 'bg-red-900/40 border-red-800 shadow-[0_0_20px_rgba(153,27,27,0.3)]' : 'bg-red-950/20 border-red-900/50 hover:bg-red-900/30'}
         `}
@@ -126,7 +111,7 @@ const VillageButton = ({ name, clans, onClanClick }: { name: string, clans?: { n
             clans.map(clan => (
               <button
                 key={clan.name}
-                onClick={() => onClanClick ? onClanClick(clan.path) : null}
+                onClick={() => onClanClick ? onClanClick(clan.path, name) : null}
                 className="w-full text-left px-4 py-2 text-stone-300 hover:text-red-200 hover:bg-red-900/20 rounded-sm transition-colors text-center font-zen tracking-widest text-sm"
               >
                 {clan.name}
@@ -144,27 +129,36 @@ const VillageButton = ({ name, clans, onClanClick }: { name: string, clans?: { n
 };
 
 const Home = () => {
-  const [isKonohaTransitionActive, setIsKonohaTransitionActive] = useState(false);
+  const [isTransitionActive, setIsTransitionActive] = useState(false);
   const [targetPath, setTargetPath] = useState<string | null>(null);
+  const [activeVillage, setActiveVillage] = useState<string | null>(null);
+  const [transitionVillage, setTransitionVillage] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleKonohaClanClick = (path: string) => {
+  const handleClanClick = (path: string, village: string) => {
     setTargetPath(path);
-    setIsKonohaTransitionActive(true);
+    setTransitionVillage(village);
+    setIsTransitionActive(true);
   };
 
   const handleTransitionComplete = () => {
     if (targetPath) {
       navigate(targetPath);
-      setIsKonohaTransitionActive(false);
+      setIsTransitionActive(false);
+      setTransitionVillage(null);
     }
+  };
+
+  const handleVillageToggle = (villageName: string) => {
+    setActiveVillage(current => current === villageName ? null : villageName);
   };
 
   return (
     <div className="h-screen w-full bg-stone-950 flex flex-col items-center justify-center space-y-12 relative overflow-hidden">
 
-      <KonohaTransition
-        isActive={isKonohaTransitionActive}
+      <VillageTransition
+        isActive={isTransitionActive}
+        village={transitionVillage}
         onComplete={handleTransitionComplete}
       />
 
@@ -187,19 +181,54 @@ const Home = () => {
           name="Konoha"
           clans={[
             { name: "UCHIHA", path: "/uchiha" },
-            { name: "SENJU", path: "/senju" }
+            { name: "SENJU", path: "/senju" },
+            { name: "NARA", path: "/nara" },
           ]}
-          onClanClick={handleKonohaClanClick}
+          isOpen={activeVillage === 'Konoha'}
+          onToggle={() => handleVillageToggle('Konoha')}
+          onClanClick={handleClanClick}
         />
 
-        <VillageButton name="Ame" />
+        <VillageButton
+          name="Suna"
+          clans={[
+            { name: "KYOUFUU", path: "/kyoufuu" },
+            { name: "SABAKU", path: "/sabaku" },
+            { name: "SUPAIDA", path: "/supaida" },
+          ]}
+          isOpen={activeVillage === 'Suna'}
+          onToggle={() => handleVillageToggle('Suna')}
+          onClanClick={handleClanClick}
+        />
 
-        <VillageButton name="Suna" />
+        <VillageButton
+          name="Ame"
+          clans={[
+            { name: "KAMI", path: "/kami" },
+            { name: "SALAMANDRE", path: "/salamandre" },
+            { name: "FUMA", path: "/fuma" },
+          ]}
+          isOpen={activeVillage === 'Ame'}
+          onToggle={() => handleVillageToggle('Ame')}
+          onClanClick={handleClanClick}
+        />
+
+        <VillageButton
+          name="Kiri"
+          clans={[
+            { name: "HOZUKI", path: "/hozuki" },
+            { name: "TSUKI", path: "/tsuki" },
+            { name: "KAGUYA", path: "/kaguya" },
+          ]}
+          isOpen={activeVillage === 'Kiri'}
+          onToggle={() => handleVillageToggle('Kiri')}
+          onClanClick={handleClanClick}
+        />
 
       </div>
 
       <div className="absolute bottom-10 opacity-20 animate-pulse">
-        <span className="text-6xl text-red-900">❖</span>
+        <img src="/src/assets/logo.png" alt="Logo" className="w-16 h-16 object-contain filter grayscale" />
       </div>
     </div>
   );
@@ -210,8 +239,18 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/uchiha" element={<UchihaGrimoire />} />
-        <Route path="/senju" element={<SenjuGrimoire />} />
+        <Route path="/uchiha" element={<ClanGrimoire clanName="uchiha" />} />
+        <Route path="/senju" element={<ClanGrimoire clanName="senju" />} />
+        <Route path="/nara" element={<ClanGrimoire clanName="nara" />} />
+        <Route path="/kyoufuu" element={<ClanGrimoire clanName="kyoufuu" />} />
+        <Route path="/sabaku" element={<ClanGrimoire clanName="sabaku" />} />
+        <Route path="/supaida" element={<ClanGrimoire clanName="supaida" />} />
+        <Route path="/kami" element={<ClanGrimoire clanName="kami" />} />
+        <Route path="/salamandre" element={<ClanGrimoire clanName="salamandre" />} />
+        <Route path="/fuma" element={<ClanGrimoire clanName="fuma" />} />
+        <Route path="/hozuki" element={<ClanGrimoire clanName="hozuki" />} />
+        <Route path="/tsuki" element={<ClanGrimoire clanName="tsuki" />} />
+        <Route path="/kaguya" element={<ClanGrimoire clanName="kaguya" />} />
       </Routes>
     </BrowserRouter>
   )
