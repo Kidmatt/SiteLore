@@ -89,8 +89,8 @@ const KonohaTransition = ({ isActive, onComplete }: { isActive: boolean; onCompl
         initial={{ scale: 0, opacity: 0, rotate: -180 }}
         animate={{ scale: [0, 1, 50], opacity: [0, 1, 1], rotate: [0, 0, 0] }}
         transition={{
-          duration: 2.5,
-          times: [0, 0.4, 1],
+          duration: 1.5,
+          times: [0, 0.1, 1],
           ease: "easeInOut"
         }}
         onAnimationComplete={onComplete}
