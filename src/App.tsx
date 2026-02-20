@@ -98,10 +98,15 @@ const VillageButton = ({
     <div className="relative group">
       <button
         onClick={onToggle}
-        className={`px-8 py-4 border transition-all duration-500 rounded-sm relative overflow-hidden min-w-[200px]
+        className={`px-8 py-4 border transition-all duration-500 rounded-sm relative overflow-hidden min-w-[200px] flex items-center justify-center gap-4
           ${isOpen ? 'bg-red-900/40 border-red-800 shadow-[0_0_20px_rgba(153,27,27,0.3)]' : 'bg-red-950/20 border-red-900/50 hover:bg-red-900/30'}
         `}
       >
+        <img 
+          src={`/${name.toLowerCase()}.svg`} 
+          alt={`${name} logo`}
+          className="w-8 h-8 object-contain relative z-10 opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300 drop-shadow-[0_0_5px_rgba(220,38,38,0.3)] filter sepia-[0.3] hue-rotate-[-30deg]"
+        />
         <span className="relative z-10 text-xl font-cinzel tracking-[0.2em] text-red-100 group-hover:text-white transition-colors uppercase">
           {name}
         </span>
